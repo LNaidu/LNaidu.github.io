@@ -1,23 +1,47 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title></title>
+		<title>Lowkey Chat</title>
 		<style>
-			input:invalid {
-				border: 2px solid red;
-			}
+			li{list-style-type: none;}
 		</style>
 	</head>
 	<body>
-		<form id="myForm" method="POST">
-			First Name: <input type="text" name="first name"> <br>
-			 Last Name: <input type="text" name="last name"> <br>
-			 <br> <br>
-			 Username: <input type="text" name="User name"> <br>
-			 Password: <input type="password" name="password"> <br>
-			 Email: <input type="email" name="email" required> <br> <br>
-
-			<input type="submit" value="Submit">
+		<form id='chatForm'>
+			<input type='text' name='message' value='message' onfocus="if (this.value=='message') this.value='';" id='text'>
+			<input type="submit">
 		</form>
+		<ul id="chats"></ul>
+		<script src='https://code.jquery.com/jquery-2.1.4.min.js'></script>
+		<script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+		<script type="text/javascript">
+			var $chatForm = $('#chatForm');
+			//set up a event listner on the chat form
+			var rootRef = new Firebase('https://lowkeychat.firebaseio.com/');
+			var messages = rootRef.child('message')
+			var username = "Lokesh";
+			var $chats=$("#chats");
+
+			$chatForm.submit(function(event){
+				//send the chat to the db
+				event.preventDefault();
+				var message = event.target.children.message.value;
+				messages.push({
+					message:message,
+					username:username,
+					time:Date.now()
+				});
+				$('#text').val("message");
+				event.target.children.message.value = '';
+			});
+
+			messages.on('child_added', function(snapshot){
+				//create a DOM element with a chat element
+				var $newChat = $("<li></li>");
+				$newChat.text(snapshot.val().message);
+				//add messages to the DOM
+				$chats.append($newChat);
+			});
+		</script>
 	</body>
 </html>
